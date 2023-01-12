@@ -242,7 +242,7 @@ function displayResults(initialObjName, dataToDisplay, printFunc) {
         if (data.type == 'function') {
             nameDisplay += "()"
         }
-        rows.push([rows.length, nameDisplay, data.type, data.value, data.namespace])
+        rows.push([rows.length, nameDisplay, data.type, data.value])
     }
     const WIDTH = 80
     const starLength = Math.floor((WIDTH - initialObjName.length - " Inspecting  ".length) / 2)
@@ -254,7 +254,7 @@ function displayResults(initialObjName, dataToDisplay, printFunc) {
     printFunc("*" + " ".repeat(title.length - 2) + "*")
     printFunc("*".repeat(title.length))
     printFunc(" ")
-    printTable(["Row", "Property Name", "Type", "Value", "Namespace"], rows, printFunc)
+    printTable(["Row", "Property Name", "Type", "Value"], rows, printFunc)
 }
 
 export function header(titles, sizes) {
