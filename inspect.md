@@ -8,6 +8,11 @@ Features:
 * Go to deeper levels at once by specifying a `--depth` value, or `--expand` a specific object.
 * Use `--doc` to quickly go to the documentation page for an object.
 
+## Screenshot
+
+<!--![inspect --depth 3](inspect.png | width=100)-->
+<img src="inspect.png" width="300">
+
 ## Source file
 [inspect.js](inspect.js)
 
@@ -31,13 +36,14 @@ inspect
 
 ## Methods You Don't Want to Call
 
-Be aware that inspecting to a depth of higher than 1 can lead to methods getting called that you don't want.
+Inspecting to a depth of higher than 1 can lead to methods getting called that you don't want.
 So back up the game first in case this happens.
 
 For example, while developing this script, I accidentally called `ns.corporation.goPublic()`.
 This can only happen for methods without parameters.
 
-To avoid this, make changes to the `functionArgs` object.
+To avoid this, before increasing the depth,
+make changes to the `functionArgs` object for any 0-argument functions shown at the current depth.
 `goPublic()` is already included, so you shouldn't have that particular problem.
 
 ## Ram Error
