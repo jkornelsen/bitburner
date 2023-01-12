@@ -14,7 +14,7 @@ Features:
 ## Installation
 Either copy and paste from the source file, or enter the following in the Bitburner terminal.
 ```
-wget https://github.com/jkornelsen/bitburner/blob/main/inspect.js
+wget https://raw.githubusercontent.com/jkornelsen/bitburner/main/inspect.js inspect.js
 ````
 
 ## Basic Usage
