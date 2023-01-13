@@ -29,10 +29,11 @@ export async function main(ns) {
     //
     //**************************************************************************
     const objToInspect = [ns.infiltration, "ns.infiltration"]
-    //const objToInspect = [ns.corporation, "ns.corproration"]
+    //const objToInspect = [ns.corporation, "ns.corporation"]
+    //const objToInspect = [ns.corporation.getOffice("Ag", "Sector-12"), "ns.corporation.getOffice()"]
+    //const objToInspect = [ns.corporation.getWarehouse("Ag", "Sector-12"), "ns.corporation.getWarehouse()"]
+    //const objToInspect = [ns.corporation.getMaterial("Ag", "Sector-12", "Water"), "ns.corporation.getMaterial()"]
     //const objToInspect = [ns.bladeburner, "ns.bladeburner"]
-    //const office = ns.corporation.getOffice("Ag", "Sector-12")
-    //const objToInspect = [office, "ns.corporation.getOffice()"]
     //const terminalInput = document.getElementById("terminal-input")
     //const objToInspect = [terminalInput, "document.getElementById"]
     inspect({
@@ -46,6 +47,7 @@ export async function main(ns) {
 }
 
 const DO_NOT_CALL = "don't call this function"
+const DEPRECATED = "deprecated"
 //******************************************************************************
 // If a function requires arguments, it will fail to be fully inspected unless
 // the arguments are specified here.
@@ -59,7 +61,39 @@ const DO_NOT_CALL = "don't call this function"
 // then go to the next depth.
 //******************************************************************************
 const functionArgs = {
+    //ns.infiltration
     'getInfiltration': ["Joe's Guns"],
+    //ns.corporation
+    'getDivision': ["Ag"],
+    'getIndustryData': ["Agriculture"],
+    'getMaterialData': ["Water"],
+    'getUnlockUpgradeCost': ["Smart Supply"],
+    'getUpgradeLevel': ["Smart Factories"],
+    'getUpgradeLevelCost': ["Smart Factories"],
+    'hasUnlockUpgrade': ["Smart Supply"],
+    'goPublic': DO_NOT_CALL,
+    'acceptInvestmentOffer': DO_NOT_CALL,
+    'getOffice': ["Ag", "Sector-12"],
+    'getHireAdVertCost': ["Ag"],
+    'getHireAdVertCount': ["Ag"],
+    'getOfficeSizeUpgradeCost': ["Ag", "Sector-12", 3],
+    'getResearchCost': ["Ag", "Hi-Tech R&D Laboratory"],
+    'hasResearched': ["Ag", "Hi-Tech R&D Laboratory"],
+    'getWarehouse': ["Ag", "Sector-12"],
+    'hasWarehouse': ["Ag", "Sector-12"],
+    'getUpgradeWarehouseCost': ["Ag", "Sector-12", 1],
+    'getMaterial': ["Ag", "Sector-12", "Water"],
+    'getProduct': ["Sw", "Sector-12", "SwProd1"],
+    'getEmployee': DEPRECATED,
+	'getExpandCityCost': DEPRECATED,
+	'getExpandIndustryCost': DEPRECATED,
+	'getIndustryTypes': DEPRECATED,
+	'getMaterialNames': DEPRECATED,
+	'getPurchaseWarehouseCost': DEPRECATED,
+	'getResearchNames': DEPRECATED,
+	'getUnlockables': DEPRECATED,
+	'getUpgradeNames': DEPRECATED,
+    //ns.bladeburner
     'getCityChaos': ["Sector-12"],
     'getCityCommunities': ["Sector-12"],
     'getCityEstimatedPopulation': ["Sector-12"],
@@ -73,9 +107,6 @@ const functionArgs = {
     'getTeamSize': ["Operation", "Investigation"],
     'getSkillLevel': ["Blade's Intuition"],
     'stopBladeburnerAction': DO_NOT_CALL,
-    'getOffice': ["Ag", "Sector-12"],
-    'goPublic': DO_NOT_CALL,
-    'acceptInvestmentOffer': DO_NOT_CALL,
 }
 
 //******************************************************************************
@@ -130,13 +161,21 @@ function inspect(argd) {
     let objectsNotExpanded = []
     while (objectsToInspect.length > 0) {
         const toInspect = objectsToInspect.pop()
-        const type = typeof toInspect.obj
+        let type = typeof toInspect.obj
         let value = ""
         //debugger  //Helpful to trace errors. First go to Debug > Activate.
         if (toInspect.depth < argd.maxDepth) {
             let nextObj = null
             if (type == 'object') {
                 nextObj = toInspect.obj
+                value = Object.prototype.toString.call(toInspect.obj)
+                if (value == "[object Object]") {
+                    value = "Object"
+                }
+                if (Array.isArray(toInspect.obj)) {
+                    type = "array"
+                    value = "length " + toInspect.obj.length
+                }
             } else if (type == 'function') {
                 let args = []
                 const baseName = toInspect.name.split(/\./g).at(-1)
@@ -145,6 +184,8 @@ function inspect(argd) {
                 }
                 if (args == DO_NOT_CALL) {
                     value = "(did not call)"
+                } else if (args == DEPRECATED) {
+                    value = "deprecated"
                 } else {
                     try {
                         nextObj = toInspect.obj(...args)
@@ -154,7 +195,7 @@ function inspect(argd) {
                     }
                 }
             }
-            if (nextObj != null) {
+            if (nextObj !== null) {
                 if (typeof nextObj == 'object') {
                     for (const prop of Object.keys(nextObj).reverse()) {
                         const data = new DataToInspect()
@@ -165,7 +206,6 @@ function inspect(argd) {
                         objectsToInspect.push(data)
                     }
                 } else {
-                    objectsToInspect.push(["@returns", nextObj, toInspect.depth + 1])
                     const data = new DataToInspect()
                     data.name = "@returns"
                     data.namespace = toInspect.namespace
@@ -179,6 +219,10 @@ function inspect(argd) {
         }
         if (['string', 'number', 'boolean'].includes(type)) {
             value = toInspect.obj
+        } else if (type == 'undefined') {
+            if (toInspect.obj === undefined) {  //always true?
+                value = "undefined"
+            }
         }
         const data = new DataToDisplay()
         data.name = toInspect.name
