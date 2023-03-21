@@ -30,20 +30,25 @@ export async function main(ns) {
     //**************************************************************************
     const objToInspect = [ns.infiltration, "ns.infiltration"]
     //const objToInspect = [ns.corporation, "ns.corporation"]
+    //const objToInspect = [ns.singularity.getCrimeStats("Larceny"), "ns.singularity.getCrimeStats()"]
+    //const objToInspect = [ns.singularity.getCurrentWork(), "ns.singularity.getCurrentWork()"]
+    //const objToInspect = [ns.grafting, "ns.grafting"]
+    //const objToInspect = [ns.corporation.getIndustryData("Tobacco"), "ns.corporation.getIndustryData()"]
     //const objToInspect = [ns.corporation.getOffice("Ag", "Sector-12"), "ns.corporation.getOffice()"]
     //const objToInspect = [ns.corporation.getWarehouse("Ag", "Sector-12"), "ns.corporation.getWarehouse()"]
     //const objToInspect = [ns.corporation.getMaterial("Ag", "Sector-12", "Water"), "ns.corporation.getMaterial()"]
     //const objToInspect = [ns.bladeburner, "ns.bladeburner"]
     //const terminalInput = document.getElementById("terminal-input")
     //const objToInspect = [terminalInput, "document.getElementById"]
-    inspect({
+    await inspect({
         obj: objToInspect[0],
         name: objToInspect[1],
         maxDepth: flags.depth,
         expand: flags.expand,
         exDepth: flags.exdepth,
         doc: flags.doc,
-        printFunc: ns.tprintf})
+        printFunc: ns.tprintf,
+        sleepFunc: ns.sleep})
 }
 
 const DO_NOT_CALL = "don't call this function"
@@ -64,9 +69,11 @@ const functionArgs = {
     //ns.infiltration
     'getInfiltration': ["Joe's Guns"],
     //ns.corporation
-    'getDivision': ["Ag"],
+    //'getDivision': ["Ag"],
+    'getDivision': ["Tob"],
     'getIndustryData': ["Agriculture"],
     'getMaterialData': ["Water"],
+    'getProduct': ["Tob", "TobProd10"],
     'getUnlockUpgradeCost': ["Smart Supply"],
     'getUpgradeLevel': ["Smart Factories"],
     'getUpgradeLevelCost': ["Smart Factories"],
@@ -107,6 +114,9 @@ const functionArgs = {
     'getTeamSize': ["Operation", "Investigation"],
     'getSkillLevel': ["Blade's Intuition"],
     'stopBladeburnerAction': DO_NOT_CALL,
+    //ns.grafting
+    'getAugmentationGraftPrice': ["Unstable Circadian Modulator"],
+    'getAugmentationGraftTime': ["Unstable Circadian Modulator"], 
 }
 
 //******************************************************************************
@@ -147,7 +157,7 @@ function increaseStaticRamCostOfThisScript() {
     ns.bladeburner.startAction()  //4 GB
 }
 
-function inspect(argd) {
+async function inspect(argd) {
     const objectsToInspect = []
     {
         const data = new DataToInspect()
@@ -160,6 +170,7 @@ function inspect(argd) {
     const rowsToDisplay = []
     let objectsNotExpanded = []
     while (objectsToInspect.length > 0) {
+        await argd.sleepFunc(0)
         const toInspect = objectsToInspect.pop()
         let type = typeof toInspect.obj
         let value = ""
@@ -235,13 +246,14 @@ function inspect(argd) {
     }
     if (argd.expand > -1 && argd.expand < rowsToDisplay.length) {
         const data = rowsToDisplay[argd.expand]
-        inspect({
+        await inspect({
             obj: data.obj,
             name: data.namespace,
             maxDepth: argd.exDepth,
             expand: -1,  //don't expand more than once
             doc: argd.doc,
-            printFunc: argd.printFunc})
+            printFunc: argd.printFunc,
+            sleepFunc: argd.sleepFunc})
         return
     }
     if (argd.doc > -1 && argd.doc < rowsToDisplay.length) {
